@@ -1,7 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"prend/pkg/core"
+)
 
 func main() {
-	fmt.Println("vim-go")
+	core.Init()
 }
