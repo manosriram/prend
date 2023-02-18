@@ -1,8 +1,5 @@
 name: test config name
 description: test config description
 sources:
-  - destination_path : sampleurl
-    repo_url: samplerepourl
-    proto_files:
-      - asd
-    branch: testbranch
+  - repo_url: https://github.com/manosriram-youtube/reddit_backend/tree/master/gateway/protos
+    dest_path: vendors/gateway_protos
