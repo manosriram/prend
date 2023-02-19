@@ -4,8 +4,19 @@ import (
 	"io/ioutil"
 	"log"
 
+	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
+
+type service struct {
+	logger *zap.SugaredLogger
+}
+
+func NewVendorService(logger *zap.SugaredLogger) *service {
+	return &service{
+		logger: logger,
+	}
+}
 
 type Source struct {
 	// Destination_path string   `yaml:"destination_path"`

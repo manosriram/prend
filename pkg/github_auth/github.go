@@ -40,31 +40,37 @@ type githubFolderTree struct {
 }
 
 type service struct {
-	Client http.Client
+	client http.Client
+}
+
+func NewGithubService(client http.Client) *service {
+	return &service{
+		client: client,
+	}
 }
 
 type GithubCreds struct {
 	Token string
 }
 
-func getRawUrl(url string, path string, token string) string {
+func (svc *service) getRawUrl(url string, path string, token string) string {
 	comSplit := strings.Split(url, ".git")
 	gitSplit := strings.Split(comSplit[0], "/")
 	username := gitSplit[3]
 	repo := gitSplit[4]
 
 	u := "https://api.github.com/repos/%s/%s/contents/%s"
-	var x string
+	var apiUrl string
 	if token != "" {
 		u += "?token=%s"
-		x = fmt.Sprintf(u, username, repo, path, token)
+		apiUrl = fmt.Sprintf(u, username, repo, path, token)
 	} else {
-		x = fmt.Sprintf(u, username, repo, path)
+		apiUrl = fmt.Sprintf(u, username, repo, path)
 	}
-	return x
+	return apiUrl
 }
 
-func GetGithubCreds() (*GithubCreds, error) {
+func (svc *service) GetGithubCreds() (*GithubCreds, error) {
 	token := os.Getenv("GITHUB_TOKEN")
 
 	return &GithubCreds{
@@ -96,11 +102,11 @@ func get(url string) (string, error) {
 	return string(body), nil
 }
 
-func getFilesFromGithub(source core.Source, creds *GithubCreds) {
-	protoUrl := getRawUrl(source.RepoUrl, source.SourcePath, creds.Token)
+func (svc *service) getFilesFromGithub(source core.Source, creds *GithubCreds) {
+	protoUrl := svc.getRawUrl(source.RepoUrl, source.SourcePath, creds.Token)
 	protoFileList, err := get(protoUrl)
 	if err != nil {
-		fmt.Printf("source %s not found\n", source.RepoUrl)
+		fmt.Printf("source %s not found. set GITHUB_TOKEN env var for private repos\n", (source.RepoUrl + "/" + source.SourcePath))
 		return
 	}
 
@@ -138,9 +144,9 @@ func getFilesFromGithub(source core.Source, creds *GithubCreds) {
 	}
 }
 
-func GetSources(conf *core.Conf, creds *GithubCreds) {
+func (svc *service) GetSources(conf *core.Conf, creds *GithubCreds) {
 	for _, source := range conf.Sources {
-		getFilesFromGithub(source, creds)
+		svc.getFilesFromGithub(source, creds)
 		// if source.Branch == "" {
 		// fmt.Printf("missing branch for %s, defaulting to master\n", source.Repo_url)
 		// source.Branch = "master"

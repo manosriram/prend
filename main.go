@@ -1,23 +1,35 @@
 package main
 
 import (
-	"os"
-	"prend/pkg/core"
-	github "prend/pkg/github_auth"
+	"prend/pkg/cmd"
 )
 
 func main() {
-	conf, _ := core.Init()
-	creds, _ := github.GetGithubCreds()
+	cmd.Execute()
+	// if len(os.Args) == 1 {
+	// log.Fatal("no cmd provided")
+	// }
 
-	cmd := os.Args[1]
+	// conf, err := core.Init()
+	// if err != nil {
+	// log.Fatal("error initializing prend")
+	// }
 
-	switch cmd {
-	case "source":
-		github.GetSources(conf, creds)
+	// client := http.DefaultClient
+	// githubSvc := github.NewGithubService(*client)
 
-	case "init":
-		return
-	}
+	// creds, err := githubSvc.GetGithubCreds()
+	// if err != nil {
+	// log.Fatal("error initializing github creds")
+	// }
+
+	// cmd := os.Args[1]
+	// switch cmd {
+	// case "source":
+	// githubSvc.GetSources(conf, creds)
+
+	// case "init":
+	// return
+	// }
 
 }
