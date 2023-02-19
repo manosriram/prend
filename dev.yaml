@@ -1,5 +1,10 @@
 name: test config name
 description: test config description
 sources:
-  - repo_url: https://github.com/manosriram-youtube/reddit_backend/tree/master/gateway/protos
-    dest_path: vendors/gateway_protos
+  - repo_url: https://github.com/manosriram-youtube/reddit_backend.git
+    source_proto_path: gateway/protos
+    destination_proto_path: vendors/gateway_protos
+  - repo_url: https://github.com/manosriram-youtube/reddit_backend.git
+    source_proto_path: post_service/protos
+    destination_proto_path: vendors/post_service_protos
+

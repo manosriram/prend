@@ -9,10 +9,10 @@ import (
 
 type Source struct {
 	// Destination_path string   `yaml:"destination_path"`
-	Repo_url         string   `yaml:"repo_url"`
-	Proto_file_paths []string `yaml: "proto_file_urls"`
-	Branch           string   `yaml: "branch"`
-	DestinationPath  string   `yaml:"dest_path"`
+	RepoUrl         string `yaml:"repo_url"`
+	Branch          string `yaml: "branch"`
+	DestinationPath string `yaml:"destination_proto_path"`
+	SourcePath      string `yaml:"source_proto_path"`
 }
 
 type Conf struct {
