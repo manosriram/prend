@@ -1,4 +1,4 @@
-module prend
+module github.com/manosriram/prend
 
 go 1.18
 
