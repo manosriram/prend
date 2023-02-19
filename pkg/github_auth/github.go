@@ -7,8 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"prend/pkg/core"
 	"strings"
+
+	"github.com/manosriram/prend/pkg/core"
 )
 
 // {

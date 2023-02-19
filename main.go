@@ -1,7 +1,7 @@
 package main
 
 import (
-	"prend/pkg/cmd"
+	"github.com/manosriram/prend/pkg/cmd"
 )
 
 func main() {

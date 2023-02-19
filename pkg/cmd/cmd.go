@@ -5,8 +5,10 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"prend/pkg/core"
-	github "prend/pkg/github_auth"
+
+	github "github.com/manosriram/prend/pkg/github_auth"
+
+	"github.com/manosriram/prend/pkg/core"
 
 	"github.com/spf13/cobra"
 )
