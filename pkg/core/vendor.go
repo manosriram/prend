@@ -33,7 +33,7 @@ type Conf struct {
 }
 
 func loadYaml() (*Conf, error) {
-	yamlFile, err := ioutil.ReadFile("dev.yaml")
+	yamlFile, err := ioutil.ReadFile("prend.yaml")
 
 	if err != nil {
 		log.Fatal(err)

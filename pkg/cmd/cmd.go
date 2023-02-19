@@ -17,10 +17,10 @@ var rootCmd = &cobra.Command{
 	Long:  "vendoring for protobufs",
 }
 
-var sourceCmd = &cobra.Command{
-	Use:   "source",
-	Short: "update all the sources from prend.config file",
-	Long:  "pulls all the updated proto files from the given sources",
+var fetchCmd = &cobra.Command{
+	Use:   "fetch",
+	Short: "fetch all the sources from prend.config file",
+	Long:  "fetches all the updated proto files from the given sources",
 	Run: func(cmd *cobra.Command, args []string) {
 		conf, err := core.Init()
 		if err != nil {
@@ -39,7 +39,7 @@ var sourceCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(sourceCmd)
+	rootCmd.AddCommand(fetchCmd)
 }
 
 func Execute() {
