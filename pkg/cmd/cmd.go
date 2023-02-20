@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"os"
 
-	github "github.com/manosriram/prend/pkg/github_auth"
+	github "github.com/manosriram/prend/pkg/github"
 
 	"github.com/manosriram/prend/pkg/core"
 

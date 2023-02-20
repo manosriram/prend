@@ -7,4 +7,3 @@ sources:
   - repo_url: https://github.com/manosriram-youtube/reddit_backend.git
     source_proto_path: post_service/proto
     destination_proto_path: vendors/post_service_protos
-
