@@ -35,4 +35,3 @@ TODO
 - [ ] commit hash for each prend unique fetch
 - [ ] other version control support (tentative)
 - [ ] cleanup vendor folder before fetch
-- [ ] 
