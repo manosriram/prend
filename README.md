@@ -34,4 +34,5 @@ TODO
 - [ ] `prend cleanup` command
 - [ ] commit hash for each prend unique fetch
 - [ ] other version control support (tentative)
-- [ ] TBD
+- [ ] cleanup vendor folder before fetch
+- [ ] 
