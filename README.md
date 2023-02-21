@@ -1,4 +1,4 @@
-# prend
+# prend (vAlpha)
 vendoring tool for protocol buffers. customizable vendoring for proto files, 
 
 # prend config
@@ -13,10 +13,10 @@ sources:
     source_proto_path: gateway/protos
     destination_proto_path: vendors/gateway_protos
   - repo_url: https://github.com/manosriram-youtube/reddit_backend.git
-    source_proto_path: post_service/proto
+    source_proto_path: post_service/protos
     destination_proto_path: vendors/post_service_protos
 ```
-`repo_url`: the .git url of the git repository
+`repo_url`: the `.git` url of the git repository
 
 `source_proto_path`: the proto file(s) path in the repository
 
@@ -34,4 +34,4 @@ TODO
 - [ ] `prend cleanup` command
 - [ ] commit hash for each prend unique fetch
 - [ ] other version control support (tentative)
-- [ ] TBD
+- [ ] cleanup vendor folder before fetch
