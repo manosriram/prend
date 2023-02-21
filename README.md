@@ -13,10 +13,10 @@ sources:
     source_proto_path: gateway/protos
     destination_proto_path: vendors/gateway_protos
   - repo_url: https://github.com/manosriram-youtube/reddit_backend.git
-    source_proto_path: post_service/proto
+    source_proto_path: post_service/protos
     destination_proto_path: vendors/post_service_protos
 ```
-`repo_url`: the .git url of the git repository
+`repo_url`: the `.git` url of the git repository
 
 `source_proto_path`: the proto file(s) path in the repository
 
