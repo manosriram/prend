@@ -6,15 +6,19 @@ All the proto file source must be defined in the **prend.yaml** file
 
 **prend.yaml example**
 ```yaml
-name: example name
-description: example description
+name: test config name
+description: test config description
 sources:
   - repo_url: https://github.com/manosriram-youtube/reddit_backend.git
-    source_proto_path: gateway/protos
-    destination_proto_path: vendors/gateway_protos
-  - repo_url: https://github.com/manosriram-youtube/reddit_backend.git
-    source_proto_path: post_service/protos
-    destination_proto_path: vendors/post_service_protos
+    paths:
+    - source_proto_path: gateway/protos
+      destination_proto_path: vendors/gateway_protos
+    - source_proto_path: post_service/protos
+      destination_proto_path: vendors/post_service_protos
+  - repo_url: https://github.com/manosriram-youtube/grpc-heartbeat.git
+    paths:
+    - source_proto_path: heartbeat_pb
+      destination_proto_path: pb/heartbeat_protos
 ```
 `repo_url`: the `.git` url of the git repository
 
