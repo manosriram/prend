@@ -3,7 +3,11 @@ package core
 import (
 	"io/ioutil"
 	"log"
+	"os"
+	"time"
 
+	"github.com/manosriram/prend/pkg/data"
+	"github.com/manosriram/prend/pkg/github"
 	"go.uber.org/zap"
 	"gopkg.in/yaml.v3"
 )
@@ -18,21 +22,7 @@ func NewVendorService(logger *zap.SugaredLogger) *service {
 	}
 }
 
-type Source struct {
-	// Destination_path string   `yaml:"destination_path"`
-	RepoUrl         string `yaml:"repo_url"`
-	Branch          string `yaml: "branch"`
-	DestinationPath string `yaml:"destination_proto_path"`
-	SourcePath      string `yaml:"source_proto_path"`
-}
-
-type Conf struct {
-	Name        string   `yaml:"name"`
-	Description string   `yaml:"description"`
-	Sources     []Source `yaml: "sources"`
-}
-
-func loadYaml() (*Conf, error) {
+func loadYaml() (*data.Conf, error) {
 	yamlFile, err := ioutil.ReadFile("prend.yaml")
 
 	if err != nil {
@@ -40,7 +30,7 @@ func loadYaml() (*Conf, error) {
 		return nil, err
 	}
 
-	d := Conf{}
+	d := data.Conf{}
 	err = yaml.Unmarshal(yamlFile, &d)
 	if err != nil {
 		log.Fatal(err)
@@ -49,10 +39,61 @@ func loadYaml() (*Conf, error) {
 	return &d, nil
 }
 
-func Init() (*Conf, error) {
+func Init() (*data.Conf, error) {
 	return loadYaml()
 }
 
-func Update() {}
+func writeLockFile(sources data.LockYamlData, f *os.File) error {
+	yamlData, _ := yaml.Marshal(&sources)
+	_, err := f.WriteString(string(yamlData))
+	if err != nil {
+		return err
+	}
 
-func updateSources() {}
+	return nil
+}
+
+func getSourcesFromGithub(conf *data.Conf, creds *data.GithubCreds) ([]*data.RepoTree, error) {
+	fileName := "prend-lock.yaml"
+	f, err := os.OpenFile(fileName, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0600)
+	if err != nil {
+		return nil, err
+	}
+	f.Truncate(0)
+	var sources data.LockYamlData
+
+	var trees []*data.RepoTree
+	for _, source := range conf.Sources {
+		tree, err := github.GetRepoTree(source, creds)
+		if err != nil {
+			return nil, err
+		}
+
+		err = github.GetFilesFromGithub(source, creds)
+		if err != nil {
+			return trees, err
+		}
+
+		trees = append(trees, tree)
+		sources.Sources = append(sources.Sources, data.LockFile{
+			Repo:        source.RepoUrl,
+			Branch:      "master",
+			Commit:      tree.Commit.Sha,
+			LastUpdated: time.Now(),
+		})
+	}
+	err = writeLockFile(sources, f)
+	if err != nil {
+		return nil, err
+	}
+
+	f.Close()
+	return trees, nil
+}
+
+func GetSources(conf *data.Conf, creds *data.GithubCreds) {
+	_, err := getSourcesFromGithub(conf, creds)
+	if err != nil {
+		log.Fatal("error occurred ", err)
+	}
+}

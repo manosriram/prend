@@ -36,7 +36,13 @@ var fetchCmd = &cobra.Command{
 			log.Fatal("error initializing github creds")
 		}
 
-		githubSvc.GetSources(conf, creds)
+		// remove "vendor" folder
+		err = os.RemoveAll("vendors")
+		if err != nil {
+			log.Fatal("error removing vendors directory during initialization")
+		}
+
+		core.GetSources(conf, creds)
 	},
 }
 

@@ -8,19 +8,8 @@ import (
 	"strings"
 
 	"github.com/manosriram/prend/pkg/api"
-	"github.com/manosriram/prend/pkg/core"
+	"github.com/manosriram/prend/pkg/data"
 )
-
-type githubFolderTree struct {
-	Name        string `json:"name"`
-	Path        string `json:"path"`
-	Sha         string `json:"sha"`
-	Size        int32  `json:"size"`
-	Url         string `json:"url"`
-	DownloadUrl string `json:"download_url"`
-	HtmlUrl     string `json:"html_url"`
-	Type        string `json:"type"`
-}
 
 type service struct {
 	client http.Client
@@ -32,11 +21,7 @@ func NewGithubService(client http.Client) *service {
 	}
 }
 
-type GithubCreds struct {
-	Token string
-}
-
-func (svc *service) getRawUrl(url string, path string, token string) string {
+func getRawUrl(url string, path string, token string) *data.RawUrl {
 	comSplit := strings.Split(url, ".git")
 	gitSplit := strings.Split(comSplit[0], "/")
 	username := gitSplit[3]
@@ -50,61 +35,85 @@ func (svc *service) getRawUrl(url string, path string, token string) string {
 	} else {
 		apiUrl = fmt.Sprintf(u, username, repo, path)
 	}
-	return apiUrl
+	return &data.RawUrl{
+		Username:   username,
+		Repository: repo,
+		Url:        apiUrl,
+	}
 }
 
-func (svc *service) GetGithubCreds() (*GithubCreds, error) {
+func (svc *service) GetGithubCreds() (*data.GithubCreds, error) {
 	token := os.Getenv("GITHUB_TOKEN")
 
-	return &GithubCreds{
+	return &data.GithubCreds{
 		Token: token,
 	}, nil
 }
 
-func (svc *service) getFilesFromGithub(source core.Source, creds *GithubCreds) {
-	protoUrl := svc.getRawUrl(source.RepoUrl, source.SourcePath, creds.Token)
-	protoFileList, err := api.Get(protoUrl)
+func GetRepoTree(source data.Source, creds *data.GithubCreds) (*data.RepoTree, error) {
+	g := getRawUrl(source.RepoUrl, "", creds.Token)
+	var shaHashPath string
+	if creds.Token != "" {
+		shaHashPath = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/master?token=%s", g.Username, g.Repository, creds.Token)
+	} else {
+		shaHashPath = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/master", g.Username, g.Repository)
+	}
+	b, err := api.Get(shaHashPath, creds.Token)
 	if err != nil {
-		fmt.Printf("source %s not found. set GITHUB_TOKEN env var for private repos\n", (source.RepoUrl + "/" + source.SourcePath))
-		return
+		fmt.Errorf("error getting api %s, %s", shaHashPath, err.Error())
 	}
 
-	if _, err := os.Stat(source.DestinationPath); os.IsNotExist(err) {
-		os.MkdirAll(source.DestinationPath, os.ModeDir|0755)
-	}
-
-	var r []githubFolderTree
-	err = json.Unmarshal([]byte(protoFileList), &r)
-	if err != nil {
-		panic(err)
-	}
-
-	for _, entry := range r {
-		if entry.Type == "file" {
-			ext := strings.Split(entry.Name, ".")
-			if len(ext) > 1 && ext[1] == "proto" {
-				fmt.Printf("source %s found\n", entry.HtmlUrl)
-
-				fileContent, _ := api.Get(entry.DownloadUrl)
-				path := fmt.Sprintf("vendor")
-
-				if source.DestinationPath != "" {
-					path = source.DestinationPath
-				}
-
-				f, err := os.OpenFile(fmt.Sprintf("%s/%s", path, entry.Name), os.O_RDWR|os.O_CREATE, 0755)
-				if err != nil {
-					fmt.Println(err)
-				}
-				f.Write([]byte(fileContent))
-			}
-
-		}
-	}
+	var ff data.RepoTree
+	err = json.Unmarshal([]byte(b), &ff)
+	return &ff, nil
 }
 
-func (svc *service) GetSources(conf *core.Conf, creds *GithubCreds) {
-	for _, source := range conf.Sources {
-		svc.getFilesFromGithub(source, creds)
+func GetFilesFromGithub(source data.Source, creds *data.GithubCreds) error {
+	for _, path := range source.Paths {
+		g := getRawUrl(source.RepoUrl, path.SourcePath, creds.Token)
+		protoFileList, err := api.Get(g.Url, creds.Token)
+		if err != nil {
+			fmt.Printf("source %s not found. set GITHUB_TOKEN env var for private repos\n", (source.RepoUrl + "/" + path.SourcePath))
+			return err
+		}
+
+		if _, err := os.Stat(path.DestinationPath); os.IsNotExist(err) {
+			os.MkdirAll(path.DestinationPath, os.ModeDir|0755)
+		}
+
+		var r []data.GithubFileTree
+
+		err = json.Unmarshal([]byte(protoFileList), &r)
+		if err != nil {
+			return err
+		}
+
+		for _, entry := range r {
+			if entry.Type == "file" {
+				ext := strings.Split(entry.Name, ".")
+				if len(ext) > 1 && ext[1] == "proto" {
+					fmt.Printf("source %s found\n", entry.HtmlUrl)
+
+					fileContent, err := api.Get(entry.DownloadUrl, creds.Token)
+					if err != nil {
+						return err
+					}
+
+					vendorPath := fmt.Sprintf("vendor")
+
+					if path.DestinationPath != "" {
+						vendorPath = path.DestinationPath
+					}
+
+					f, err := os.OpenFile(fmt.Sprintf("%s/%s", vendorPath, entry.Name), os.O_RDWR|os.O_CREATE, 0755)
+					if err != nil {
+						return err
+					}
+					f.Write([]byte(fileContent))
+				}
+			}
+		}
 	}
+
+	return nil
 }
