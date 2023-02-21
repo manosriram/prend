@@ -1,4 +1,4 @@
-# prend
+# prend (vAlpha)
 vendoring tool for protocol buffers. customizable vendoring for proto files, 
 
 # prend config
