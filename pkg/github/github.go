@@ -21,20 +21,21 @@ func NewGithubService(client http.Client) *service {
 	}
 }
 
-func getRawUrl(url string, path string, token string) *data.RawUrl {
-	comSplit := strings.Split(url, ".git")
+func getRawUrl(source data.Source, path string, token string) *data.RawUrl {
+	comSplit := strings.Split(source.RepoUrl, ".git")
 	gitSplit := strings.Split(comSplit[0], "/")
 	username := gitSplit[3]
 	repo := gitSplit[4]
 
-	u := "https://api.github.com/repos/%s/%s/contents/%s"
+	u := "https://api.github.com/repos/%s/%s/contents/%s?"
 	var apiUrl string
-	if token != "" {
-		u += "?token=%s"
-		apiUrl = fmt.Sprintf(u, username, repo, path, token)
-	} else {
-		apiUrl = fmt.Sprintf(u, username, repo, path)
+	if source.Branch != "" {
+		u += "ref=" + source.Branch + "&"
 	}
+	if token != "" {
+		u += "token=" + token
+	}
+	apiUrl = fmt.Sprintf(u, username, repo, path)
 	return &data.RawUrl{
 		Username:   username,
 		Repository: repo,
@@ -50,17 +51,38 @@ func (svc *service) GetGithubCreds() (*data.GithubCreds, error) {
 	}, nil
 }
 
+func getRepoDefaultBranch(url string, creds *data.GithubCreds) (*data.GithubFileTree, error) {
+	r, err := api.Request(url, creds.Token, http.MethodGet)
+	if err != nil {
+		return &data.GithubFileTree{}, err
+	}
+	var ff data.GithubFileTree
+	err = json.Unmarshal([]byte(r), &ff)
+	if err != nil {
+		return &data.GithubFileTree{}, err
+	}
+	return &ff, nil
+}
+
 func GetRepoTree(source data.Source, creds *data.GithubCreds) (*data.RepoTree, error) {
-	g := getRawUrl(source.RepoUrl, "", creds.Token)
+	g := getRawUrl(source, "", creds.Token)
+
+	u := "https://api.github.com/repos/manosriram-youtube/reddit_backend"
+	fileTree, err := getRepoDefaultBranch(u, creds)
+	if err != nil {
+		fmt.Errorf("error getting default branch %s\n", err.Error())
+	}
+
 	var shaHashPath string
 	if creds.Token != "" {
-		shaHashPath = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/master?token=%s", g.Username, g.Repository, creds.Token)
+		shaHashPath = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/%s?token=%s", g.Username, g.Repository, creds.Token, fileTree.DefaultBranch)
 	} else {
-		shaHashPath = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/master", g.Username, g.Repository)
+		shaHashPath = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/%s", g.Username, g.Repository, fileTree.DefaultBranch)
 	}
-	b, err := api.Get(shaHashPath, creds.Token)
+
+	b, err := api.Request(shaHashPath, creds.Token, http.MethodPatch)
 	if err != nil {
-		fmt.Errorf("error getting api %s, %s", shaHashPath, err.Error())
+		fmt.Errorf("error getting api %s, %s\n", shaHashPath, err.Error())
 	}
 
 	var ff data.RepoTree
@@ -70,10 +92,10 @@ func GetRepoTree(source data.Source, creds *data.GithubCreds) (*data.RepoTree, e
 
 func GetFilesFromGithub(source data.Source, creds *data.GithubCreds) error {
 	for _, path := range source.Paths {
-		g := getRawUrl(source.RepoUrl, path.SourcePath, creds.Token)
-		protoFileList, err := api.Get(g.Url, creds.Token)
+		g := getRawUrl(source, path.SourcePath, creds.Token)
+		protoFileList, err := api.Request(g.Url, creds.Token, http.MethodGet)
 		if err != nil {
-			fmt.Printf("source %s not found. set GITHUB_TOKEN env var for private repos\n", (source.RepoUrl + "/" + path.SourcePath))
+			// fmt.Printf("source %s not found. set GITHUB_TOKEN env var for private repos\n", (source.RepoUrl + "/" + path.SourcePath))
 			return err
 		}
 
@@ -94,7 +116,7 @@ func GetFilesFromGithub(source data.Source, creds *data.GithubCreds) error {
 				if len(ext) > 1 && ext[1] == "proto" {
 					fmt.Printf("source %s found\n", entry.HtmlUrl)
 
-					fileContent, err := api.Get(entry.DownloadUrl, creds.Token)
+					fileContent, err := api.Request(entry.DownloadUrl, creds.Token, http.MethodGet)
 					if err != nil {
 						return err
 					}

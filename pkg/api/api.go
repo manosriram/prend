@@ -7,9 +7,9 @@ import (
 	"net/http"
 )
 
-func Get(url, token string) (string, error) {
+func Request(url, token string, mthd string) (string, error) {
 	client := http.DefaultClient
-	req, err := http.NewRequest("GET", url, nil)
+	req, err := http.NewRequest(mthd, url, nil)
 	if token != "" {
 		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", token))
 	}

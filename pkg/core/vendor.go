@@ -1,9 +1,11 @@
 package core
 
 import (
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/manosriram/prend/pkg/data"
@@ -68,6 +70,9 @@ func getSourcesFromGithub(conf *data.Conf, creds *data.GithubCreds) ([]*data.Rep
 		if err != nil {
 			return nil, err
 		}
+		if source.Branch == "" {
+			source.Branch = tree.Name
+		}
 
 		err = github.GetFilesFromGithub(source, creds)
 		if err != nil {
@@ -77,7 +82,7 @@ func getSourcesFromGithub(conf *data.Conf, creds *data.GithubCreds) ([]*data.Rep
 		trees = append(trees, tree)
 		sources.Sources = append(sources.Sources, data.LockFile{
 			Repo:        source.RepoUrl,
-			Branch:      "master",
+			Branch:      tree.Name,
 			Commit:      tree.Commit.Sha,
 			LastUpdated: time.Now(),
 		})
@@ -91,9 +96,29 @@ func getSourcesFromGithub(conf *data.Conf, creds *data.GithubCreds) ([]*data.Rep
 	return trees, nil
 }
 
+func rollbackFetches(conf *data.Conf) {
+	for _, source := range conf.Sources {
+		for _, path := range source.Paths {
+			x, err := os.Getwd()
+			if err != nil {
+				fmt.Errorf("error getting workingdir %s", err.Error())
+				return
+			}
+			rootDir := strings.Split(path.DestinationPath, "/")[0]
+			destPath := fmt.Sprintf("%s/%s", x, rootDir)
+
+			err = os.RemoveAll(destPath)
+			if err != nil {
+				fmt.Errorf("error removing rootDir %s", err.Error())
+			}
+		}
+	}
+}
+
 func GetSources(conf *data.Conf, creds *data.GithubCreds) {
 	_, err := getSourcesFromGithub(conf, creds)
 	if err != nil {
-		log.Fatal("error occurred ", err)
+		rollbackFetches(conf)
+		log.Fatal("error occurred during fetch. rolling back all fetches. ", err.Error())
 	}
 }

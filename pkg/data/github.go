@@ -5,14 +5,15 @@ type GithubCreds struct {
 }
 
 type GithubFileTree struct {
-	Name        string `json:"name"`
-	Path        string `json:"path"`
-	Sha         string `json:"sha"`
-	Size        int32  `json:"size"`
-	Url         string `json:"url"`
-	DownloadUrl string `json:"download_url"`
-	HtmlUrl     string `json:"html_url"`
-	Type        string `json:"type"`
+	Name          string `json:"name"`
+	Path          string `json:"path"`
+	Sha           string `json:"sha"`
+	Size          int32  `json:"size"`
+	Url           string `json:"url"`
+	DownloadUrl   string `json:"download_url"`
+	HtmlUrl       string `json:"html_url"`
+	Type          string `json:"type"`
+	DefaultBranch string `json:"default_branch"`
 }
 
 type GithubFolderTree struct {

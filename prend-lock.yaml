@@ -1,9 +1,0 @@
-sources:
-    - repo: https://github.com/manosriram-youtube/reddit_backend.git
-      commit: db92089e8a25c9a9df2859e9928a3a855a9026e5
-      branch: master
-      lastupdated: 2023-02-21T22:07:32.773367+05:30
-    - repo: https://github.com/manosriram-youtube/grpc-heartbeat.git
-      commit: 5714b12225161ef5999a250767382708d1298aaa
-      branch: master
-      lastupdated: 2023-02-21T22:07:33.827345+05:30
