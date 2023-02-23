@@ -41,7 +41,7 @@ TODO
 - [x] track commit for fetches
 - [x] branch support
 - [ ] ssh support
-- [ ] `prend cleanup` command
+- [x] `prend clean` command
 - [ ] other version control support (tentative)
-- [ ] cleanup vendor folder before fetch
+- [x] cleanup vendor folder before fetch
 
