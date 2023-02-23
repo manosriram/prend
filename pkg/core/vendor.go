@@ -96,7 +96,7 @@ func getSourcesFromGithub(conf *data.Conf, creds *data.GithubCreds) ([]*data.Rep
 	return trees, nil
 }
 
-func rollbackFetches(conf *data.Conf) {
+func cleanupSourceDirectories(conf *data.Conf) {
 	for _, source := range conf.Sources {
 		for _, path := range source.Paths {
 			x, err := os.Getwd()
@@ -118,7 +118,11 @@ func rollbackFetches(conf *data.Conf) {
 func GetSources(conf *data.Conf, creds *data.GithubCreds) {
 	_, err := getSourcesFromGithub(conf, creds)
 	if err != nil {
-		rollbackFetches(conf)
+		cleanupSourceDirectories(conf)
 		log.Fatal("error occurred during fetch. rolling back all fetches. ", err.Error())
 	}
+}
+
+func Clean(conf *data.Conf) {
+	cleanupSourceDirectories(conf)
 }

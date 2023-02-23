@@ -46,8 +46,22 @@ var fetchCmd = &cobra.Command{
 	},
 }
 
+var cleanCmd = &cobra.Command{
+	Use:   "clean",
+	Short: "cleans up all source_proto_path directories",
+	Long:  "cleans up source_proto_path directories from prend.yaml file",
+	Run: func(cmd *cobra.Command, args []string) {
+		conf, err := core.Init()
+		if err != nil {
+			log.Fatal("error initializing prend")
+		}
+		core.Clean(conf)
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(fetchCmd)
+	rootCmd.AddCommand(cleanCmd)
 }
 
 func Execute() {

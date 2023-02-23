@@ -10,7 +10,7 @@ sources:
       destination_proto_path: vendors/post_service_protos
 
   - repo_url: https://github.com/protocolbuffers/protobuf.git
-    branch: 3.1.xa
+    branch: 3.1.x
     paths:
     - source_proto_path: examples
       destination_proto_path: protocolbuffers

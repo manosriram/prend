@@ -1,0 +1,9 @@
+sources:
+    - repo: https://github.com/manosriram-youtube/reddit_backend.git
+      commit: ""
+      branch: ""
+      lastupdated: 2023-02-23T20:22:45.993922+05:30
+    - repo: https://github.com/protocolbuffers/protobuf.git
+      commit: ""
+      branch: ""
+      lastupdated: 2023-02-23T20:22:47.067165+05:30
