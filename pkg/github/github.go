@@ -80,7 +80,7 @@ func GetRepoTree(source data.Source, creds *data.GithubCreds) (*data.RepoTree, e
 		shaHashPath = fmt.Sprintf("https://api.github.com/repos/%s/%s/branches/%s", g.Username, g.Repository, fileTree.DefaultBranch)
 	}
 
-	b, err := api.Request(shaHashPath, creds.Token, http.MethodPatch)
+	b, err := api.Request(shaHashPath, creds.Token, http.MethodGet)
 	if err != nil {
 		fmt.Errorf("error getting api %s, %s\n", shaHashPath, err.Error())
 	}
