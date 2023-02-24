@@ -34,8 +34,6 @@ Proto file vendoring
 
 ## Installing
 1. `go install github.com/manosriram/prend`
-2. `prend fetch` to fetch all protos from config
-
 
 TODO
 - [x] track commit for fetches
